@@ -21,7 +21,7 @@ findOrd :: (Int -> Int -> Bool)
         -> (String, Int)
 findOrd f g visited origin =
   let ies = UG.incidentEdges g origin
-      unvisitedEdges = filter (\(GT.Edge x y _) -> (notElem x visited) || (notElem y visited)) ies
+      unvisitedEdges = filter (\(GT.Edge x y _) -> (x `notElem` visited) || (y `notElem` visited)) ies
       shortestEdge = foldr1 (\x@(GT.Edge _ _ d) acc@(GT.Edge _ _ acc_d) -> if f d acc_d
                                                                               then x
                                                                               else acc) unvisitedEdges
@@ -50,7 +50,7 @@ testS =
 
 testGraph :: UG.UGraph String Int
 testGraph =
-  UG.fromEdgesList . foldr (\x acc -> (fst . head $ P.readP_to_S parseRoute x) : acc) [] $ lines testS
+  UG.fromEdgesList . map (fst . head . P.readP_to_S parseRoute) $ lines testS
 
 solve :: (UG.UGraph String Int -> [String] -> String -> (String, Int))
       -> UG.UGraph String Int
@@ -68,9 +68,9 @@ solve h g visited distance
 main :: IO ()
 main = do
   s <- readFile "../input"
-  let fileGraph = UG.fromEdgesList . foldr (\x acc -> (fst . head $ P.readP_to_S parseRoute x) : acc) [] $ lines s
+  let fileGraph = UG.fromEdgesList . map (fst . head . P.readP_to_S parseRoute) $ lines s
       vs = GT.vertices fileGraph
-      answer1 = minimum $ map (\x -> solve (shortest) fileGraph [x] 0) vs
-      answer2 = maximum $ map (\x -> solve (longest) fileGraph [x] 0) vs
+      answer1 = minimum $ map (\x -> solve shortest fileGraph [x] 0) vs
+      answer2 = maximum $ map (\x -> solve longest fileGraph [x] 0) vs
   putStrLn $ "Part 1: " ++ show answer1
   putStrLn $ "Part 2: " ++ show answer2
